@@ -7,7 +7,6 @@ import {
   BarChart3,
   CreditCard,
   BookOpen,
-  Activity,
   Settings,
   LogOut,
   Mail,
@@ -26,7 +25,6 @@ const NAV_ITEMS = [
   { path: "/admin/courses", label: "Courses", icon: BookOpen },
   { path: "/admin/email-marketing", label: "Email Marketing", icon: Mail },
   { path: "/admin/database", label: "Laundromat DB", icon: Database },
-  { path: "/admin/activity", label: "Activity Logs", icon: Activity },
   { path: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

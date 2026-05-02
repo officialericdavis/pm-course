@@ -23,7 +23,6 @@ const AdminMap           = lazy(() => import("./pages/admin/map").then(m => ({ d
 const AdminAnalytics     = lazy(() => import("./pages/admin/analytics").then(m => ({ default: m.AdminAnalytics })));
 const AdminPayments      = lazy(() => import("./pages/admin/payments").then(m => ({ default: m.AdminPayments })));
 const AdminCourses       = lazy(() => import("./pages/admin/courses").then(m => ({ default: m.AdminCourses })));
-const AdminActivity      = lazy(() => import("./pages/admin/activity").then(m => ({ default: m.AdminActivity })));
 const AdminEmailMarketing = lazy(() => import("./pages/admin/email-marketing").then(m => ({ default: m.AdminEmailMarketing })));
 const AdminWebsiteAnalytics = lazy(() => import("./pages/admin/website-analytics").then(m => ({ default: m.AdminWebsiteAnalytics })));
 const AdminSettings      = lazy(() => import("./pages/admin/settings").then(m => ({ default: m.AdminSettings })));
@@ -75,7 +74,6 @@ export const webRouter = createBrowserRouter([
   { path: "/admin/analytics", element: <RequireAuth><AdminAnalytics /></RequireAuth> },
   { path: "/admin/payments",  element: <RequireAuth><AdminPayments /></RequireAuth> },
   { path: "/admin/courses",   element: <RequireAuth><AdminCourses /></RequireAuth> },
-  { path: "/admin/activity",        element: <RequireAuth><AdminActivity /></RequireAuth> },
   { path: "/admin/email-marketing",    element: <RequireAuth><AdminEmailMarketing /></RequireAuth> },
   { path: "/admin/website-analytics", element: <RequireAuth><AdminWebsiteAnalytics /></RequireAuth> },
   { path: "/admin/settings",        element: <RequireAuth><AdminSettings /></RequireAuth> },

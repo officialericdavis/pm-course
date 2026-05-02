@@ -3,7 +3,7 @@ module.exports = {
     name: 'your-app',
     script: 'npm',
     args: 'start',
-    cwd: '/home/ubuntu/peter-website',
+    cwd: '/home/ubuntu/pm-course',
     env: {
       NODE_ENV: 'production',
       PORT: 3000

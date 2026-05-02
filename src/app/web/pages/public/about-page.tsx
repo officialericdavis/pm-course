@@ -8,13 +8,13 @@ import peterMayberryImage from "/src/assets/peter-mayberry.png";
 const STATS = [
   { value: "12+", label: "Locations Owned" },
   { value: "8", label: "Years in the Game" },
-  { value: "$400K", label: "First Deal Size" },
+  { value: "$105,000", label: "First Deal Size" },
   { value: "7-Fig", label: "Portfolio Value" },
 ];
 
 const TIMELINE = [
   { year: "20XX", title: "Started from Zero", body: "No background in real estate, no rich family. Just a willingness to figure things out and a conviction that laundromats were undervalued." },
-  { year: "20XX", title: "First Location", body: "Closed my first deal for $400K. Spent a year learning the hard way — equipment failures, operational headaches, the real cost of utilities. Figured it all out." },
+  { year: "20XX", title: "First Location", body: "Closed my first deal for $105,000. Spent a year learning the hard way — equipment failures, operational headaches, the real cost of utilities. Figured it all out." },
   { year: "20XX", title: "Proved the Model", body: "First location hit consistent cash flow. Realized everything I learned the hard way was repeatable. Started documenting the playbook." },
   { year: "20XX", title: "Scaled to 5 Locations", body: "Used the same framework across 5 locations. Each one easier than the last. The systems I built meant I wasn't on-site anymore — I was running a business." },
   { year: "20XX", title: "12+ Locations", body: "Expanded across multiple markets. The portfolio runs without me. Now I spend my time teaching others the exact system that got me here." },
@@ -53,11 +53,10 @@ export function AboutPage() {
             <ImageWithFallback src={peterMayberryImage} alt="Peter Mayberry" className="w-full h-[320px] sm:h-[440px] md:h-[600px] object-cover grayscale" />
           </div>
           <div>
-            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">Where I came from</h2>
-            <p className="text-lg text-neutral-700 mb-4">[Your backstory here — where you grew up, what you were doing before laundromats, what made you start looking at them.]</p>
-            <p className="text-lg text-neutral-700 mb-4">[The moment you decided this was the move — what problem were you trying to solve? What were you tired of?]</p>
-            <p className="text-lg text-neutral-700 mb-4">[What you believed about laundromats that other people didn't see yet.]</p>
-            <p className="text-lg font-bold">[One punchy sentence that captures your ethos.]</p>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">Where I came from?</h2>
+            <p className="text-lg text-neutral-700 mb-4">I grew up on the Winnebago Indian Reservation, graduated from Homer High School, and earned my degree at the University of Nebraska Kearney. After a management training program at Eaton, I joined General Electric in Omaha — rising to Area Manager and becoming one of GE's top salespeople.</p>
+            <p className="text-lg text-neutral-700 mb-4 italic font-bold">"You are a product of the people you surround yourself with."</p>
+            <p className="text-lg text-neutral-700 mb-4">Working alongside business owners shifted my focus. I saw an opportunity in laundromats, bought a run-down former dry cleaner that even my banker doubted — and turned it into something no one expected.</p>
           </div>
         </div>
       </section>
@@ -67,7 +66,7 @@ export function AboutPage() {
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-neutral-700">
           {STATS.map((s) => (
             <div key={s.label} className="text-center px-6 py-4">
-              <p className="text-4xl md:text-5xl font-black text-[#ff0000] mb-1">{s.value}</p>
+              <p className="text-3xl md:text-4xl font-black text-green-500 mb-1 break-words">{s.value}</p>
               <p className="text-sm text-neutral-400 font-bold uppercase tracking-wide">{s.label}</p>
             </div>
           ))}
@@ -100,35 +99,21 @@ export function AboutPage() {
       </section>
 
       {/* Philosophy */}
-      <section className="py-16 md:py-24 px-6 bg-white">
+      <section className="py-16 md:py-24 px-6 bg-black text-white">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-4">What I believe</h2>
-          <p className="text-xl text-neutral-600 mb-12 max-w-2xl">These aren't talking points. They're the principles I've built every location on.</p>
+          <p className="text-xl text-neutral-400 mb-12 max-w-2xl">These aren't talking points. They're the principles I've built every location on.</p>
           <div className="grid md:grid-cols-2 gap-6">
             {VALUES.map((v) => (
-              <div key={v.title} className="bg-neutral-50 border-l-4 border-black p-6 md:p-8">
+              <div key={v.title} className="bg-neutral-900 border-l-4 border-white p-6 md:p-8">
                 <h3 className="text-2xl font-black mb-3">{v.title}</h3>
-                <p className="text-neutral-700">{v.body}</p>
+                <p className="text-neutral-300">{v.body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Media / Press */}
-      <section className="py-16 md:py-24 px-6 bg-black text-white">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-4">As Seen In</h2>
-          <p className="text-neutral-400 mb-12">Press, podcasts, and features.</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="border border-neutral-700 p-6 flex items-center justify-center min-h-[80px]">
-                <p className="text-neutral-500 font-bold text-sm">[Publication {i}]</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Personal */}
       <section className="py-16 md:py-24 px-6 bg-neutral-50">
@@ -163,7 +148,7 @@ export function AboutPage() {
           <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">Ready to learn from someone who's actually done it?</h2>
           <p className="text-xl text-neutral-300 mb-10 max-w-2xl mx-auto">No theory. No gurus. Just the exact playbook I used to build 12+ cash-flowing locations.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/course" className="bg-white text-black px-10 py-5 text-lg font-bold hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2">
+            <Link to="/login" className="bg-white text-black px-10 py-5 text-lg font-bold hover:bg-neutral-200 transition-colors flex items-center justify-center gap-2">
               VIEW THE COURSE <ArrowRight size={20} />
             </Link>
             <Link to="/signup" className="border-2 border-white text-white px-10 py-5 text-lg font-bold hover:bg-white hover:text-black transition-colors">

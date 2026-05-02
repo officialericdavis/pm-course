@@ -13,26 +13,23 @@ export function CoursePage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6 bg-black text-white">
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6">
-            The Laundromat
-            <br />
-            Blueprint
+      <section className="pt-32 pb-20 px-6 text-white relative" style={{backgroundColor: "#000000"}}>
+        <div className="absolute inset-0 pointer-events-none" style={{opacity: 0.12, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cdefs%3E%3Cpattern id='smallGrid' width='10' height='10' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 10 0 L 0 0 0 10' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/pattern%3E%3Cpattern id='grid' width='80' height='80' patternUnits='userSpaceOnUse'%3E%3Crect width='80' height='80' fill='url(%23smallGrid)'/%3E%3Cpath d='M 80 0 L 0 0 0 80' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`}}></div>
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
+          <h1 className="font-black tracking-tight mb-4 text-4xl md:text-7xl">
+            The Laundromat Blueprint
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-300 mb-8 max-w-3xl mx-auto">
-            A complete system for finding, buying, and operating cash-flowing
-            laundromat businesses from scratch.
+          <p className="text-lg md:text-xl text-neutral-400 mb-8 max-w-2xl mx-auto">
+            A complete system for finding, buying, and operating cash-flowing laundromat businesses from scratch.
           </p>
-          <div className="flex flex-wrap justify-center gap-8 mb-8">
-            <div className="flex items-center gap-3">
-              <Clock className="w-6 h-6" />
-              <span className="text-lg">40+ Video Modules</span>
+          <div className="flex flex-wrap justify-center gap-6">
+            <div className="flex items-center gap-2 text-neutral-300">
+              <Clock className="w-5 h-5" />
+              <span>40+ Video Modules</span>
             </div>
-
-            <div className="flex items-center gap-3">
-              <Award className="w-6 h-6" />
-              <span className="text-lg">Lifetime Access</span>
+            <div className="flex items-center gap-2 text-neutral-300">
+              <Award className="w-5 h-5" />
+              <span>Lifetime Access</span>
             </div>
           </div>
         </div>
@@ -89,7 +86,7 @@ export function CoursePage() {
               <div className="grid md:grid-cols-2 gap-4 pl-4">
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 flex-shrink-0 mt-1" />
-                  <span>Why laundromats are recession-proof</span>
+                  <span>Why laundromats are recession-resistant</span>
                 </div>
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 flex-shrink-0 mt-1" />

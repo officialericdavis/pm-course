@@ -94,7 +94,7 @@ export function LandingPage() {
             <Link
               to="/login"
               onClick={() => trackCta("hero-start")}
-              className="bg-black text-white px-4 md:px-10 py-3 md:py-5 text-xs md:text-lg font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1 whitespace-nowrap"
+              className="wiggle bg-black text-white px-4 md:px-10 py-3 md:py-5 text-xs md:text-lg font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1 whitespace-nowrap"
             >
               START THE COURSE
               <ArrowRight className="w-3 md:w-5 h-3 md:h-5" />
@@ -121,11 +121,11 @@ export function LandingPage() {
             />
           </div>
           <div>
-            <h2 className="font-black tracking-tight mb-4 md:mb-6 text-[24px] md:text-[40px]">I built my first laundromat with $400K.</h2>
+            <h2 className="font-black tracking-tight mb-4 md:mb-6 text-[24px] md:text-[40px]">I built my first laundromat with $105,000.</h2>
             <p className="text-base sm:text-lg text-neutral-700 mb-3 md:mb-4">No rich parents. Just me and a willingness to figure shit out.</p>
             <p className="text-base sm:text-lg text-neutral-700 mb-3 md:mb-4">That first location was all me. I've scaled to 12+ locations in 8 years. Now they run without me.</p>
             <p className="text-base sm:text-lg text-neutral-700 mb-3 md:mb-4"><strong>Laundromats are just water, gas, and electricity. That's exactly why they work.</strong></p>
-            <p className="text-base sm:text-lg text-neutral-700 mb-4 md:mb-6">Why did I pick laundromats? Recession-proof. Low maintenance. High cash flow.</p>
+            <p className="text-base sm:text-lg text-neutral-700 mb-4 md:mb-6">Why did I pick laundromats? Recession-resistant. Low maintenance. High cash flow.</p>
             <p className="text-base sm:text-lg font-bold">I'm not here to sell you a dream. I'm here to show you exactly how I did it — so you can try to do it too.</p>
           </div>
         </div>
@@ -286,8 +286,9 @@ export function LandingPage() {
       </section>
 
       {/* Course Section */}
-      <section ref={courseRef} id="course" className="py-20 px-6 bg-black text-white">
-        <div className="max-w-5xl mx-auto">
+      <section ref={courseRef} id="course" className="py-20 px-6 text-white relative" style={{backgroundColor: "#000000"}}>
+        <div className="absolute inset-0 pointer-events-none" style={{opacity: 0.12, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cdefs%3E%3Cpattern id='smallGrid' width='10' height='10' patternUnits='userSpaceOnUse'%3E%3Cpath d='M 10 0 L 0 0 0 10' fill='none' stroke='%23ffffff' stroke-width='0.5'/%3E%3C/pattern%3E%3Cpattern id='grid' width='80' height='80' patternUnits='userSpaceOnUse'%3E%3Crect width='80' height='80' fill='url(%23smallGrid)'/%3E%3Cpath d='M 80 0 L 0 0 0 80' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23grid)'/%3E%3C/svg%3E")`}}></div>
+        <div className="relative z-10 max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-5xl md:text-6xl font-black tracking-tight mb-6">
               The Laundromat Blueprint
@@ -377,93 +378,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof Section */}
-      <section ref={socialProofRef} className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-black tracking-tight mb-12 text-center">
-            Real Results
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-8 border-l-4 border-black">
-              <div className="mb-4">
-                <p className="text-lg italic mb-4">
-                  ""
-                </p>
-              </div>
-              <div>
-                <p className="font-bold"></p>
-                <p className="text-sm text-neutral-600"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Personality Filter Section */}
       <section ref={personalityRef} className="py-20 px-6 bg-neutral-50">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-5xl font-black tracking-tight mb-12 text-center">
-            This is NOT for everyone
+            This is <span className="text-[#ff0000]">NOT</span> for everyone
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8">

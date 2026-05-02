@@ -4,12 +4,13 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-  "build": "vite build",
-  "dev": "vite",
-  "start": "npx serve dist -l 3000"
+    "build": "vite build",
+    "dev": "vite",
+    "start": "npx serve dist -l 3000"
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.0.2",
+    "@stripe/stripe-js": "^9.4.0",
     "@supabase/supabase-js": "^2.99.3",
     "lucide-react": "0.487.0",
     "playwright": "^1.58.2",

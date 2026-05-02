@@ -1,14 +1,16 @@
 import { Link } from "react-router";
 import { Navbar } from "../../components/layouts/navbar";
 import { Footer } from "../../components/layouts/footer";
-import { ArrowRight, CheckCircle, X, Shield } from "lucide-react";
+import { ArrowRight, CheckCircle, X } from "lucide-react";
 import { ImageWithFallback } from "../../../shared/figma/ImageWithFallback";
 import peterMayberryImage from "/src/assets/peter-mayberry.png";
 import { useSettings } from "../../../../hooks/use-settings";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { projectId } from "/utils/supabase/info";
+import { supabase } from "/utils/supabase/client";
 
 const TRACK = `https://${projectId}.supabase.co/functions/v1/make-server-623b2a1c/track`;
+const STRIPE_PRICE_ID = "price_1TSelSAZNpuUqk5vk1vE9KfC";
 
 function getSessionId(): string {
   let id = sessionStorage.getItem("_sid");
@@ -37,9 +39,22 @@ function trackCta(ctaId: string) {
   beacon(`${TRACK}/cta`, { sessionId: getSessionId(), ctaId });
 }
 
+async function redirectToCheckout() {
+  const { data, error } = await supabase.functions.invoke("create-checkout", {
+    body: {
+      priceId: STRIPE_PRICE_ID,
+      successUrl: `${window.location.origin}/checkout/success`,
+      cancelUrl: `${window.location.origin}/checkout/cancel`,
+    },
+  });
+  if (error) throw error;
+  window.location.href = data.url;
+}
+
 export function LandingPage() {
   const { settings } = useSettings();
   const coursePrice = settings?.coursePrice ?? "$997";
+  const [loading, setLoading] = useState(false);
 
   const heroRef = useRef<HTMLElement>(null);
   const aboutRef = useRef<HTMLElement>(null);
@@ -71,6 +86,18 @@ export function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
+  async function handleBuy(ctaId: string) {
+    trackCta(ctaId);
+    setLoading(true);
+    try {
+      await redirectToCheckout();
+    } catch (e) {
+      console.error(e);
+      alert("Something went wrong. Please try again.");
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -91,14 +118,14 @@ export function LandingPage() {
             No fluff. Just what actually works.
           </p>
           <div className="flex flex-row gap-2 md:gap-4 justify-center items-center px-2">
-            <Link
-              to="/login"
-              onClick={() => trackCta("hero-start")}
-              className="wiggle bg-black text-white px-4 md:px-10 py-3 md:py-5 text-xs md:text-lg font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1 whitespace-nowrap"
+            <button
+              onClick={() => handleBuy("hero-start")}
+              disabled={loading}
+              className="wiggle bg-black text-white px-4 md:px-10 py-3 md:py-5 text-xs md:text-lg font-bold hover:bg-neutral-800 transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              START THE COURSE
+              {loading ? "REDIRECTING..." : "START THE COURSE"}
               <ArrowRight className="w-3 md:w-5 h-3 md:h-5" />
-            </Link>
+            </button>
             <a
               href="#how-it-works"
               onClick={() => trackCta("hero-how-it-works")}
@@ -147,61 +174,23 @@ export function LandingPage() {
             Why most people <span className="fail-wiggle text-[#ff0000]">fail</span> at laundromats?
           </h2>
           <div className="space-y-4 md:space-y-6">
-            <div className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-neutral-600">01</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">They <span className="text-[#ff0000]">overpay</span> for locations</h3>
-                  <p className="text-sm md:text-base text-neutral-300">
-                    Bad deals kill cash flow before you start. Know exactly what to pay and how to negotiate.
-                  </p>
+            {[
+              { n: "01", title: <>They <span className="text-[#ff0000]">overpay</span> for locations</>, body: "Bad deals kill cash flow before you start. Know exactly what to pay and how to negotiate." },
+              { n: "02", title: <>They <span className="text-[#ff0000]">underestimate</span> operating costs</>, body: "Utilities, maintenance, repairs — without real numbers you'll bleed out quietly." },
+              { n: "03", title: <>They <span className="text-[#ff0000]">pick</span> terrible locations</>, body: "Demographics and traffic patterns decide your revenue. Your gut feeling doesn't." },
+              { n: "04", title: <>They have <span className="text-[#ff0000]">no</span> systems</>, body: "Machines break, customers complain. Without systems you work in the business forever." },
+              { n: "05", title: <>They <span className="text-[#ff0000]">quit</span> when it gets hard</>, body: "The first 90 days are rough. Push through and you'll print cash for years." },
+            ].map(({ n, title, body }) => (
+              <div key={n} className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
+                <div className="flex items-center gap-3 md:gap-6">
+                  <div className="text-3xl md:text-5xl font-black text-neutral-600">{n}</div>
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{title}</h3>
+                    <p className="text-sm md:text-base text-neutral-300">{body}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-neutral-600">02</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">They <span className="text-[#ff0000]">underestimate</span> operating costs</h3>
-                  <p className="text-sm md:text-base text-neutral-300">
-                    Utilities, maintenance, repairs — without real numbers you'll bleed out quietly.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-neutral-600">03</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">They <span className="text-[#ff0000]">pick</span> terrible locations</h3>
-                  <p className="text-sm md:text-base text-neutral-300">
-                    Demographics and traffic patterns decide your revenue. Your gut feeling doesn't.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-neutral-600">04</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">They have <span className="text-[#ff0000]">no</span> systems</h3>
-                  <p className="text-sm md:text-base text-neutral-300">
-                    Machines break, customers complain. Without systems you work in the business forever.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-neutral-900 p-4 md:p-6 border-l-4 md:border-l-8 border-white">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-neutral-600">05</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">They <span className="text-[#ff0000]">quit</span> when it gets hard</h3>
-                  <p className="text-sm md:text-base text-neutral-300">
-                    The first 90 days are rough. Push through and you'll print cash for years.
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -215,72 +204,24 @@ export function LandingPage() {
             </h2>
             <p className="text-base md:text-xl text-neutral-600 max-w-2xl mx-auto">A proven 5-step framework for finding, buying, and scaling profitable laundromats that work.</p>
           </div>
-
           <div className="space-y-4 md:space-y-6">
-            <div className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-black">01</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Find the Right Location</h3>
-                  <p className="text-sm md:text-base text-neutral-700">
-                    Learn my exact criteria for evaluating markets and locations.
-                    Data-driven decision making that eliminates guesswork.
-                  </p>
+            {[
+              { n: "01", title: "Find the Right Location", body: "Learn my exact criteria for evaluating markets and locations. Data-driven decision making that eliminates guesswork." },
+              { n: "02", title: "Secure the Deal", body: "Negotiation tactics, financing strategies, and legal frameworks that protect you and maximize profit potential." },
+              { n: "03", title: "Set Up for Success", body: "Equipment selection, layout optimization, and vendor relationships that reduce costs and increase revenue." },
+              { n: "04", title: "Run Lean Operations", body: "Systems for maintenance, customer service, and cash flow management. Build a business that runs itself." },
+              { n: "05", title: "Scale Your Empire", body: "Once one location is profitable, replicate the formula. Turn one laundromat into a portfolio of cash-flowing assets." },
+            ].map(({ n, title, body }) => (
+              <div key={n} className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
+                <div className="flex items-center gap-3 md:gap-6">
+                  <div className="text-3xl md:text-5xl font-black text-black">{n}</div>
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">{title}</h3>
+                    <p className="text-sm md:text-base text-neutral-700">{body}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-black">02</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Secure the Deal</h3>
-                  <p className="text-sm md:text-base text-neutral-700">
-                    Negotiation tactics, financing strategies, and legal frameworks
-                    that protect you and maximize profit potential.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-black">03</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Set Up for Success</h3>
-                  <p className="text-sm md:text-base text-neutral-700">
-                    Equipment selection, layout optimization, and vendor relationships
-                    that reduce costs and increase revenue.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-black">04</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Run Lean Operations</h3>
-                  <p className="text-sm md:text-base text-neutral-700">
-                    Systems for maintenance, customer service, and cash flow management.
-                    Build a business that runs itself.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-4 md:p-6 border-l-4 md:border-l-8 border-black">
-              <div className="flex items-center gap-3 md:gap-6">
-                <div className="text-3xl md:text-5xl font-black text-black">05</div>
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">Scale Your Empire</h3>
-                  <p className="text-sm md:text-base text-neutral-700">
-                    Once one location is profitable, replicate the formula.
-                    Turn one laundromat into a portfolio of cash-flowing assets.
-                  </p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -299,85 +240,53 @@ export function LandingPage() {
           <div className="bg-white text-black p-10 my-12">
             <h3 className="text-3xl font-bold mb-8">What's Included:</h3>
             <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">40+ Video Modules</p>
-                  <p className="text-neutral-600">Complete A-Z training system</p>
+              {[
+                { title: "40+ Video Modules", sub: "Complete A-Z training system" },
+                { title: "Location Analysis Tools", sub: "My exact evaluation spreadsheets" },
+                { title: "Deal Calculator", sub: "Know if a deal makes sense instantly" },
+                { title: "Contract Templates", sub: "Lease agreements & vendor contracts" },
+                { title: "Operations Manual", sub: "Step-by-step SOPs" },
+                { title: "Vendor Contact List", sub: "Trusted suppliers & contractors" },
+              ].map(({ title, sub }) => (
+                <div key={title} className="flex items-start gap-3">
+                  <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
+                  <div>
+                    <p className="font-bold">{title}</p>
+                    <p className="text-neutral-600">{sub}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">Location Analysis Tools</p>
-                  <p className="text-neutral-600">My exact evaluation spreadsheets</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">Deal Calculator</p>
-                  <p className="text-neutral-600">Know if a deal makes sense instantly</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">Contract Templates</p>
-                  <p className="text-neutral-600">Lease agreements & vendor contracts</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">Operations Manual</p>
-                  <p className="text-neutral-600">Step-by-step SOPs</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-6 h-6 flex-shrink-0 mt-1" />
-                <div>
-                  <p className="font-bold">Vendor Contact List</p>
-                  <p className="text-neutral-600">Trusted suppliers & contractors</p>
-                </div>
-              </div>
+              ))}
             </div>
 
             <div className="border-t-2 border-neutral-200 pt-8">
               <h3 className="text-3xl font-bold mb-6">What You'll Achieve:</h3>
               <ul className="space-y-3">
-                <li className="flex items-center gap-3">
-                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-lg">Find and evaluate profitable laundromat opportunities in your area</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-lg">Negotiate deals that make financial sense from day one</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-lg">Set up operations that run smoothly with minimal intervention</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <ArrowRight className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-lg">Build a cash-flowing asset that generates passive income</span>
-                </li>
+                {[
+                  "Find and evaluate profitable laundromat opportunities in your area",
+                  "Negotiate deals that make financial sense from day one",
+                  "Set up operations that run smoothly with minimal intervention",
+                  "Build a cash-flowing asset that generates passive income",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <ArrowRight className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-lg">{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
           <div className="flex justify-center w-full mt-20 mb-0">
-            <Link
-              to="/course"
-              onClick={() => { trackCta("course-view-details"); setTimeout(() => window.scrollTo({ top: 0 }), 0); }}
-              className="inline-block bg-white text-black px-12 py-6 text-xl font-bold hover:bg-neutral-200 transition-colors"
+            <button
+              onClick={() => handleBuy("course-enroll-now")}
+              disabled={loading}
+              className="bg-white text-black px-12 py-6 text-xl font-bold hover:bg-neutral-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              VIEW FULL COURSE DETAILS
-            </Link>
+              {loading ? "REDIRECTING..." : "ENROLL NOW"}
+            </button>
           </div>
         </div>
       </section>
-
 
       {/* Personality Filter Section */}
       <section ref={personalityRef} className="py-20 px-6 bg-neutral-50">
@@ -385,7 +294,6 @@ export function LandingPage() {
           <h2 className="text-5xl font-black tracking-tight mb-12 text-center">
             This is <span className="text-[#ff0000]">NOT</span> for everyone
           </h2>
-
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -393,55 +301,38 @@ export function LandingPage() {
                 This IS for you if:
               </h3>
               <ul className="space-y-4">
-                <li className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
-                  <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg">You have real capital and balls to invest (or can get financing)</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
-                  <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg">You want a real business, not a side hustle</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
-                  <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg">You're willing to do the work upfront for long-term payoff</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
-                  <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg">You want passive income that actually works</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
-                  <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg">You can follow a proven system</span>
-                </li>
+                {[
+                  "You have real capital and balls to invest (or can get financing)",
+                  "You want a real business, not a side hustle",
+                  "You're willing to do the work upfront for long-term payoff",
+                  "You want passive income that actually works",
+                  "You can follow a proven system",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 md:border-l-4 md:border-black md:pl-4">
+                    <div className="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0 md:hidden"></div>
+                    <span className="text-lg">{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
-
             <div>
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
                 <X className="w-8 h-8" />
                 This is NOT for you if:
               </h3>
               <ul className="space-y-4">
-                <li className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg text-neutral-600">You think you'll get rich overnight</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg text-neutral-600">You have zero capital and no plan to get it</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg text-neutral-600">You want a "passive" business without doing work</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg text-neutral-600">You need hand-holding every step of the way</span>
-                </li>
-                <li className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
-                  <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
-                  <span className="text-lg text-neutral-600">You're not serious about building real wealth</span>
-                </li>
+                {[
+                  "You think you'll get rich overnight",
+                  "You have zero capital and no plan to get it",
+                  "You want a \"passive\" business without doing work",
+                  "You need hand-holding every step of the way",
+                  "You're not serious about building real wealth",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 md:border-l-4 md:border-neutral-400 md:pl-4">
+                    <div className="w-2 h-2 bg-neutral-400 rounded-full mt-2 flex-shrink-0 md:hidden"></div>
+                    <span className="text-lg text-neutral-600">{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -452,12 +343,8 @@ export function LandingPage() {
       <section ref={pricingRef} className="py-20 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-5xl font-black tracking-tight mb-6">
-              Simple Pricing
-            </h2>
-            <p className="text-xl text-neutral-600">
-              One payment. Lifetime access. No upsells.
-            </p>
+            <h2 className="text-5xl font-black tracking-tight mb-6">Simple Pricing</h2>
+            <p className="text-xl text-neutral-600">One payment. Lifetime access. No upsells.</p>
           </div>
 
           <div className="bg-black text-white p-12 relative">
@@ -466,7 +353,6 @@ export function LandingPage() {
             </div>
 
             <div className="text-center mb-8">
-
               <p className="text-6xl font-black mb-4">{coursePrice}</p>
               <p className="text-lg text-neutral-300">One-time payment</p>
             </div>
@@ -474,33 +360,27 @@ export function LandingPage() {
             <div className="border-t border-neutral-700 pt-8 mb-8">
               <h3 className="text-xl font-bold mb-4">Everything Included:</h3>
               <ul className="space-y-3">
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>Complete Laundromat Blueprint Course</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>40+ Video Lessons & Frameworks</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>All Templates, Spreadsheets & Contracts</span>
-                </li>
-
-                <li className="flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>Lifetime Access + Future Updates</span>
-                </li>
+                {[
+                  "Complete Laundromat Blueprint Course",
+                  "40+ Video Lessons & Frameworks",
+                  "All Templates, Spreadsheets & Contracts",
+                  "Lifetime Access + Future Updates",
+                ].map((item) => (
+                  <li key={item} className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
               </ul>
             </div>
 
-
-
-            <Link
-              to="/signup"
-              onClick={() => trackCta("pricing-start-now")}
-              className="block w-full bg-white text-black text-center px-8 py-5 text-xl font-bold hover:bg-neutral-200 transition-colors"
-            >START NOW</Link>
+            <button
+              onClick={() => handleBuy("pricing-start-now")}
+              disabled={loading}
+              className="block w-full bg-white text-black text-center px-8 py-5 text-xl font-bold hover:bg-neutral-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "REDIRECTING..." : "START NOW"}
+            </button>
           </div>
         </div>
       </section>
@@ -513,16 +393,14 @@ export function LandingPage() {
             <br />
             Or you can start building.
           </h2>
-          <p className="text-2xl text-neutral-300 mb-12">
-            The choice is yours.
-          </p>
-          <Link
-            to="/signup"
-            onClick={() => trackCta("final-cta-start")}
-            className="inline-block bg-white text-black px-12 py-6 text-xl font-bold hover:bg-neutral-200 transition-colors"
+          <p className="text-2xl text-neutral-300 mb-12">The choice is yours.</p>
+          <button
+            onClick={() => handleBuy("final-cta-start")}
+            disabled={loading}
+            className="inline-block bg-white text-black px-12 py-6 text-xl font-bold hover:bg-neutral-200 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            START YOUR LAUNDROMAT BUSINESS
-          </Link>
+            {loading ? "REDIRECTING..." : "START YOUR LAUNDROMAT BUSINESS"}
+          </button>
         </div>
       </section>
 

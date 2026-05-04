@@ -464,9 +464,9 @@ app.post("/make-server-623b2a1c/login", async (c) => {
 
     if (!user) return c.json({ error: "Invalid credentials" }, 401);
 
-    // const storedAuth = await kv.get(`auth:${user.id}`);
-    // if (!storedAuth?.passwordHash) return c.json({ error: "Invalid credentials" }, 401);
-    // if (storedAuth.passwordHash !== passwordHash) return c.json({ error: "Invalid credentials" }, 401);
+    const storedAuth = await kv.get(`auth:${user.id}`);
+    if (!storedAuth?.passwordHash) return c.json({ error: "Invalid credentials" }, 401);
+    if (storedAuth.passwordHash !== passwordHash) return c.json({ error: "Invalid credentials" }, 401);
 
     const sessionToken = createSessionToken(user.id);
     await kv.set(`session:${sessionToken}`, { userId: user.id, createdAt: new Date().toISOString() });
@@ -2883,17 +2883,85 @@ app.post("/make-server-623b2a1c/admin/upload-video-url", async (c) => {
   }
 });
 
-app.get("/make-server-623b2a1c/debug/all-users", async (c) => {
-  const allUsers = await kv.getByPrefix("user:");
-  return c.json({
-    count: allUsers.length,
-    users: allUsers.map((u: any) => ({
-      id: u.id,
-      email: u.email,
-      name: u.name,
-      isAdmin: u.isAdmin,
-    })),
-  });
+
+// Deletes a video from R2 and clears the lesson's videoUrl
+app.delete("/make-server-623b2a1c/admin/delete-video/:lessonId", async (c) => {
+  try {
+    const token = c.req.header("Authorization")?.replace("Bearer ", "");
+    const { user, error, statusCode } = await requireAdmin(token);
+    if (error) return c.json({ error }, statusCode);
+
+    const lessonId = c.req.param("lessonId");
+    const { objectKey, moduleId } = await c.req.json();
+    if (!objectKey || !moduleId) return c.json({ error: "objectKey and moduleId are required" }, 400);
+
+    const accountId = Deno.env.get("R2_ACCOUNT_ID");
+    const accessKey = Deno.env.get("R2_ACCESS_KEY_ID");
+    const secretKey = Deno.env.get("R2_SECRET_ACCESS_KEY");
+    const bucketName = Deno.env.get("R2_BUCKET_NAME");
+
+    if (!accountId || !accessKey || !secretKey || !bucketName) {
+      return c.json({ error: "R2 credentials not configured" }, 500);
+    }
+
+    const region = "auto";
+    const now = new Date();
+    const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, "").slice(0, 15) + "Z";
+    const dateStamp = amzDate.slice(0, 8);
+    const credentialScope = `${dateStamp}/${region}/s3/aws4_request`;
+    const host = `${accountId}.r2.cloudflarestorage.com`;
+    const canonicalUri = `/${bucketName}/${objectKey}`;
+
+    const encoder = new TextEncoder();
+    const toHex = (buf: Uint8Array) => Array.from(buf).map(b => b.toString(16).padStart(2, "0")).join("");
+    const sign = async (key: CryptoKey, data: string) => new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(data)));
+    const importKey = async (key: Uint8Array) => crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+
+    const emptyHash = toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(""))));
+    const canonicalHeaders = `host:${host}\nx-amz-content-sha256:${emptyHash}\nx-amz-date:${amzDate}\n`;
+    const canonicalRequest = ["DELETE", canonicalUri, "", canonicalHeaders, "host;x-amz-content-sha256;x-amz-date", emptyHash].join("\n");
+    const stringToSign = ["AWS4-HMAC-SHA256", amzDate, credentialScope, toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", encoder.encode(canonicalRequest))))].join("\n");
+
+    const kDate    = await sign(await importKey(encoder.encode(`AWS4${secretKey}`)), dateStamp);
+    const kRegion  = await sign(await importKey(kDate), region);
+    const kService = await sign(await importKey(kRegion), "s3");
+    const kSigning = await sign(await importKey(kService), "aws4_request");
+    const signature = toHex(await sign(await importKey(kSigning), stringToSign));
+
+    const deleteRes = await fetch(`https://${host}/${bucketName}/${objectKey}`, {
+      method: "DELETE",
+      headers: {
+        "Host": host,
+        "x-amz-date": amzDate,
+        "x-amz-content-sha256": emptyHash,
+        "Authorization": `AWS4-HMAC-SHA256 Credential=${accessKey}/${credentialScope},SignedHeaders=host;x-amz-content-sha256;x-amz-date,Signature=${signature}`,
+      },
+    });
+
+    if (!deleteRes.ok && deleteRes.status !== 204) {
+      const body = await deleteRes.text();
+      console.error("[delete-video] R2 error:", deleteRes.status, body);
+      return c.json({ error: "Failed to delete from R2" }, 500);
+    }
+
+    // Clear videoUrl from lesson
+    const structure = await getCourseStructure();
+    const mod = structure.modules.find((m: any) => m.id === moduleId);
+    if (mod) {
+      const lesson = mod.lessons.find((l: any) => l.id === lessonId);
+      if (lesson) {
+        lesson.videoUrl = null;
+        await kv.set("course:structure", { ...structure, updatedAt: new Date().toISOString() });
+        invalidateCourseCache();
+      }
+    }
+
+    logActivity(user.id, user.name, `Deleted video for lesson: ${lessonId}`);
+    return c.json({ success: true });
+  } catch (err) {
+    console.error("[delete-video] Error:", err);
+    return c.json({ error: "Failed to delete video", details: err.message }, 500);
+  }
 });
 
-Deno.serve(app.fetch);  
+Deno.serve(app.fetch);

@@ -162,7 +162,7 @@ export function AdminCourses() {
         headers: authHeaders(),
         body: JSON.stringify({ lessonId, filename: file.name, contentType: file.type || "video/mp4" }),
       });
-      const { presignedUrl, videoPublicUrl, error } = await res.json();
+      const { presignedUrl, videoPublicUrl, objectKey, error } = await res.json();
       if (!res.ok || !presignedUrl) { toast.error(error || "Failed to get upload URL"); return; }
 
       // 2. Upload directly to R2 via XHR (for progress tracking)
@@ -178,8 +178,8 @@ export function AdminCourses() {
         xhr.send(file);
       });
 
-      // 3. Save the public URL as the lesson's videoUrl
-      await patchLesson(moduleId, lessonId, { videoUrl: videoPublicUrl });
+      // 3. Save the public URL + objectKey so we can delete later
+      await patchLesson(moduleId, lessonId, { videoUrl: videoPublicUrl, videoObjectKey: objectKey });
       toast.success("Video uploaded and saved!");
     } catch (err: any) {
       toast.error(err.message || "Upload failed");
@@ -187,6 +187,30 @@ export function AdminCourses() {
       setUploadingLesson(null);
       setUploadingModuleId(null);
       setUploadProgress(0);
+    }
+  };
+
+  const handleDeleteVideo = async (moduleId: string, lessonId: string, objectKey: string | null) => {
+    if (!confirm("Delete this video? This cannot be undone.")) return;
+    try {
+      if (objectKey) {
+        // Delete from R2
+        const res = await fetch(`${API}/admin/delete-video/${lessonId}`, {
+          method: "DELETE",
+          headers: authHeaders(),
+          body: JSON.stringify({ objectKey, moduleId }),
+        });
+        const data = await res.json();
+        if (!res.ok) { toast.error(data.error || "Failed to delete video"); return; }
+      } else {
+        // Just clear the URL (manually set URL, no R2 object)
+        await patchLesson(moduleId, lessonId, { videoUrl: null, videoObjectKey: null });
+      }
+      toast.success("Video deleted");
+      invalidateCourseStructureCache();
+      refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Delete failed");
     }
   };
 
@@ -325,7 +349,16 @@ export function AdminCourses() {
                               ) : (
                                 <>
                                   {lesson.videoUrl ? (
-                                    <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700">LIVE</span>
+                                    <div className="flex items-center gap-1">
+                                      <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700">LIVE</span>
+                                      <button
+                                        onClick={() => handleDeleteVideo(mod.id, lesson.id, (lesson as any).videoObjectKey ?? null)}
+                                        className="p-1.5 hover:bg-red-50 text-neutral-300 hover:text-red-500 transition-colors"
+                                        title="Delete video"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </div>
                                   ) : (
                                     <span className="px-2 py-0.5 text-xs font-bold bg-neutral-100 text-neutral-400">NO VIDEO</span>
                                   )}

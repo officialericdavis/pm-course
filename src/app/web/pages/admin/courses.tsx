@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { AdminLayout } from "../../components/layouts/admin-layout";
 import {
   ChevronDown, ChevronRight, Edit2, Trash2, Plus, Save, X,
-  Upload, ArrowUp, ArrowDown, GripVertical, Link as LinkIcon,
+  Upload, ArrowUp, ArrowDown, GripVertical, Link as LinkIcon, Loader2,
 } from "lucide-react";
 import { projectId } from "/utils/supabase/info";
 import { toast } from "sonner";
@@ -52,6 +52,10 @@ export function AdminCourses() {
   const [addingModule, setAddingModule] = useState(false);
   const [newModuleTitle, setNewModuleTitle] = useState("");
   const newLessonRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingLesson, setUploadingLesson] = useState<string | null>(null);
+  const [uploadingModuleId, setUploadingModuleId] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const totalLessons = structure?.modules.reduce((acc, m) => acc + m.lessons.length, 0) ?? 0;
   const videosUploaded = structure?.modules.reduce(
@@ -145,6 +149,45 @@ export function AdminCourses() {
     toast.success("Video URL saved");
     setEditingVideo(null);
     setVideoUrl("");
+  };
+
+  const handleVideoUpload = async (moduleId: string, lessonId: string, file: File) => {
+    setUploadingLesson(lessonId);
+    setUploadingModuleId(moduleId);
+    setUploadProgress(0);
+    try {
+      // 1. Get presigned URL from edge function
+      const res = await fetch(`${API}/admin/upload-video-url`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ lessonId, filename: file.name, contentType: file.type || "video/mp4" }),
+      });
+      const { presignedUrl, videoPublicUrl, error } = await res.json();
+      if (!res.ok || !presignedUrl) { toast.error(error || "Failed to get upload URL"); return; }
+
+      // 2. Upload directly to R2 via XHR (for progress tracking)
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", presignedUrl);
+        xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () => xhr.status < 300 ? resolve() : reject(new Error(`Upload failed: ${xhr.status}`));
+        xhr.onerror = () => reject(new Error("Network error during upload"));
+        xhr.send(file);
+      });
+
+      // 3. Save the public URL as the lesson's videoUrl
+      await patchLesson(moduleId, lessonId, { videoUrl: videoPublicUrl });
+      toast.success("Video uploaded and saved!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed");
+    } finally {
+      setUploadingLesson(null);
+      setUploadingModuleId(null);
+      setUploadProgress(0);
+    }
   };
 
   const moveModule = (moduleId: string, direction: "up" | "down") => {
@@ -274,18 +317,45 @@ export function AdminCourses() {
                             </div>
 
                             <div className="flex items-center gap-1 shrink-0">
-                              {lesson.videoUrl ? (
-                                <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700">LIVE</span>
+                              {uploadingLesson === lesson.id ? (
+                                <div className="flex items-center gap-2 px-2">
+                                  <Loader2 size={13} className="animate-spin text-neutral-500" />
+                                  <span className="text-xs font-bold text-neutral-500">{uploadProgress}%</span>
+                                </div>
                               ) : (
-                                <span className="px-2 py-0.5 text-xs font-bold bg-neutral-100 text-neutral-400">NO VIDEO</span>
+                                <>
+                                  {lesson.videoUrl ? (
+                                    <span className="px-2 py-0.5 text-xs font-bold bg-green-100 text-green-700">LIVE</span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 text-xs font-bold bg-neutral-100 text-neutral-400">NO VIDEO</span>
+                                  )}
+                                  {/* Upload button */}
+                                  <button
+                                    onClick={() => {
+                                      const input = document.createElement("input");
+                                      input.type = "file";
+                                      input.accept = "video/*";
+                                      input.onchange = (e) => {
+                                        const file = (e.target as HTMLInputElement).files?.[0];
+                                        if (file) handleVideoUpload(mod.id, lesson.id, file);
+                                      };
+                                      input.click();
+                                    }}
+                                    className="p-1.5 hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-black"
+                                    title="Upload video to R2"
+                                  >
+                                    <Upload size={13} />
+                                  </button>
+                                  {/* Manual URL button */}
+                                  <button
+                                    onClick={() => { setEditingVideo(lesson.id); setVideoUrl(lesson.videoUrl ?? ""); }}
+                                    className="p-1.5 hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-black"
+                                    title="Set video URL manually"
+                                  >
+                                    <LinkIcon size={13} />
+                                  </button>
+                                </>
                               )}
-                              <button
-                                onClick={() => { setEditingVideo(lesson.id); setVideoUrl(lesson.videoUrl ?? ""); }}
-                                className="p-1.5 hover:bg-neutral-100 transition-colors text-neutral-400 hover:text-black"
-                                title="Set video URL"
-                              >
-                                <LinkIcon size={13} />
-                              </button>
                               <button onClick={() => moveLesson(mod, lesson.id, "up")} disabled={lessonIdx === 0} className="p-1.5 hover:bg-neutral-100 disabled:opacity-20 transition-colors">
                                 <ArrowUp size={13} />
                               </button>
@@ -297,6 +367,16 @@ export function AdminCourses() {
                               </button>
                             </div>
                           </div>
+
+                          {/* Upload progress bar */}
+                          {uploadingLesson === lesson.id && (
+                            <div className="mt-2 ml-7">
+                              <div className="w-full bg-neutral-100 h-1.5">
+                                <div className="bg-black h-full transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                              </div>
+                              <p className="text-xs text-neutral-400 mt-1">Uploading to Cloudflare R2... {uploadProgress}%</p>
+                            </div>
+                          )}
 
                           {/* Video URL editor */}
                           {isEditingThisVideo && (

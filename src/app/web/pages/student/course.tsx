@@ -128,7 +128,7 @@ export function StudentCourse() {
                 <p className="font-black text-sm uppercase tracking-wide">Course Modules</p>
               </div>
               <div className="divide-y divide-neutral-200 max-h-[calc(100vh-220px)] overflow-y-auto">
-                {structure?.modules.map((mod) => {
+                {structure?.modules.map((mod, modIndex) => {
                   const { done, total } = moduleProgress(mod);
                   const isModuleComplete = completedModules.includes(mod.id);
                   const isExpanded = expandedModules.has(mod.id);
@@ -142,7 +142,7 @@ export function StudentCourse() {
                             <div className="w-[18px] h-[18px] rounded-full border-2 border-neutral-300 shrink-0" />
                           )}
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-neutral-400 uppercase">{mod.id.replace("module-", "Module ")}</p>
+                            <p className="text-xs font-bold text-neutral-400 uppercase">Module {modIndex + 1}</p>
                             <p className="text-sm font-bold leading-tight truncate">{mod.title}</p>
                           </div>
                         </div>

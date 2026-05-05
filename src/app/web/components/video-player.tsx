@@ -45,7 +45,10 @@ export function VideoPlayer({ videoUrl, title, lessonNumber, onEnded }: VideoPla
         ref={videoRef}
         className="w-full h-full"
         controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
         preload="metadata"
+        onContextMenu={(e) => e.preventDefault()}
         onEnded={handleEnded}
         key={videoUrl}
       >

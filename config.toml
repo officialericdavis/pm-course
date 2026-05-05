@@ -1,0 +1,9 @@
+[functions.make-server-623b2a1c]
+verify_jwt = false
+
+[cron.inactive-students-weekly]
+schedule = "0 9 * * 1"
+function = "make-server-623b2a1c"
+method = "POST"
+path = "/make-server-623b2a1c/cron/inactive-students"
+headers = { x-cron-secret = "env(CRON_SECRET)" }

@@ -22,10 +22,15 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Right-aligned START NOW button */}
-        <Link to="/login" className="bg-black text-white px-4 md:px-6 py-2 text-xs md:text-sm font-bold hover:bg-neutral-800 transition-colors">
-          START NOW
-        </Link>
+        {/* Right-aligned auth buttons */}
+        <div className="flex items-center gap-2">
+          <Link to="/login" className="px-4 md:px-5 py-2 text-xs md:text-sm font-bold border-2 border-black hover:bg-neutral-100 transition-colors">
+            LOG IN
+          </Link>
+          <Link to="/signup" className="bg-black text-white px-4 md:px-5 py-2 text-xs md:text-sm font-bold hover:bg-neutral-800 transition-colors">
+            SIGN UP
+          </Link>
+        </div>
       </div>
     </nav>
   );

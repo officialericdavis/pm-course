@@ -469,7 +469,10 @@ app.post("/make-server-623b2a1c/login", async (c) => {
     if (storedAuth.passwordHash !== passwordHash) return c.json({ error: "Invalid credentials" }, 401);
 
     const sessionToken = createSessionToken(user.id);
-    await kv.set(`session:${sessionToken}`, { userId: user.id, createdAt: new Date().toISOString() });
+    await Promise.all([
+      kv.set(`session:${sessionToken}`, { userId: user.id, createdAt: new Date().toISOString() }),
+      kv.set(`user:${user.id}`, { ...user, lastActiveAt: new Date().toISOString() }),
+    ]);
 
     logActivity(user.id, user.name, "Logged in");
 
@@ -3048,6 +3051,92 @@ app.put("/make-server-623b2a1c/legal/:page", async (c) => {
     return c.json({ success: true, updatedAt });
   } catch {
     return c.json({ error: "Failed to update page" }, 500);
+  }
+});
+
+// ── Inactive Students Cron ───────────────────────────────────────────────────
+
+app.post("/make-server-623b2a1c/cron/inactive-students", async (c) => {
+  try {
+    // Verify cron secret to prevent unauthorized calls
+    const secret = c.req.header("x-cron-secret");
+    const expectedSecret = Deno.env.get("CRON_SECRET");
+    if (expectedSecret && secret !== expectedSecret) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) return c.json({ error: "RESEND_API_KEY not set" }, 500);
+
+    const settings = await getSettings();
+    const fromName = settings.emailFromName ?? settings.platformName ?? "Peter Mayberry";
+    const fromEmail = settings.emailFromEmail ?? Deno.env.get("FROM_EMAIL") ?? "onboarding@resend.dev";
+
+    const now = Date.now();
+    const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+    const allUsers = await kv.getByPrefix("user:");
+    // Only students (non-admin), with access
+    const students = allUsers.filter((u: any) => !u.isAdmin && (u.paymentStatus === "paid" || u.paymentStatus === "coupon_free"));
+
+    let sent = 0;
+    let skipped = 0;
+
+    for (const user of students) {
+      // Determine last active: use lastActiveAt if set, else fall back to createdAt
+      const lastActive = user.lastActiveAt ?? user.createdAt;
+      if (!lastActive) { skipped++; continue; }
+
+      const inactiveSince = now - new Date(lastActive).getTime();
+      if (inactiveSince < SEVEN_DAYS_MS) { skipped++; continue; }
+
+      // Don't re-send if we already sent an inactive email recently (within 7 days)
+      if (user.inactiveEmailSentAt) {
+        const lastSent = now - new Date(user.inactiveEmailSentAt).getTime();
+        if (lastSent < SEVEN_DAYS_MS) { skipped++; continue; }
+      }
+
+      const daysSince = Math.floor(inactiveSince / (24 * 60 * 60 * 1000));
+
+      const html = `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
+          <h2 style="font-size:24px;font-weight:900;margin-bottom:8px;">We miss you, ${user.name?.split(" ")[0] ?? "there"} 👋</h2>
+          <p style="color:#555;margin-bottom:16px;">You haven't logged into the <strong>${settings.platformName ?? "Mayberry Laundromat Course"}</strong> in ${daysSince} days.</p>
+          <p style="color:#555;margin-bottom:24px;">Your laundromat journey is waiting. Even 15 minutes today keeps the momentum going.</p>
+          <a href="${Deno.env.get("SITE_URL") ?? "https://petermayberry.com"}/login" style="display:inline-block;background:#000;color:#fff;padding:14px 28px;font-weight:700;text-decoration:none;font-size:15px;">
+            Continue Learning →
+          </a>
+          <p style="color:#aaa;font-size:12px;margin-top:32px;">You're receiving this because you enrolled in ${settings.platformName ?? "the Mayberry Laundromat Course"}.</p>
+        </div>
+      `;
+
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: `${fromName} <${fromEmail}>`,
+          to: [user.email],
+          subject: `${user.name?.split(" ")[0] ?? "Hey"}, your laundromat course is waiting for you`,
+          html,
+        }),
+      });
+
+      if (res.ok) {
+        // Mark email sent so we don't spam them
+        await kv.set(`user:${user.id}`, { ...user, inactiveEmailSentAt: new Date().toISOString() });
+        sent++;
+      } else {
+        const err = await res.json().catch(() => ({}));
+        console.error(`[cron/inactive-students] Failed to email ${user.email}:`, err);
+        skipped++;
+      }
+    }
+
+    console.log(`[cron/inactive-students] sent=${sent} skipped=${skipped}`);
+    return c.json({ success: true, sent, skipped });
+  } catch (err) {
+    console.error("[cron/inactive-students] Error:", err);
+    return c.json({ error: "Cron job failed", details: err.message }, 500);
   }
 });
 

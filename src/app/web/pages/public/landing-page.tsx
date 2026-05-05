@@ -53,7 +53,7 @@ async function redirectToCheckout() {
 
 export function LandingPage() {
   const { settings } = useSettings();
-  const coursePrice = settings?.coursePrice ?? "$997";
+  const coursePrice = settings?.coursePrice ?? "$389";
   const [loading, setLoading] = useState(false);
 
   const heroRef = useRef<HTMLElement>(null);
@@ -353,7 +353,8 @@ export function LandingPage() {
             </div>
 
             <div className="text-center mb-8">
-              <p className="text-6xl font-black mb-4">{coursePrice}</p>
+              {/* <p className="text-6xl font-black mb-4">{coursePrice}</p> */}
+              <p className="text-6xl font-black mb-4">$389</p>
               <p className="text-lg text-neutral-300">One-time payment</p>
             </div>
 

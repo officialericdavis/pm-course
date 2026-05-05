@@ -6,7 +6,7 @@ import { useSettings } from "../../../../hooks/use-settings";
 
 export function CoursePage() {
   const { settings } = useSettings();
-  const coursePrice = settings?.coursePrice ?? "$997";
+  const coursePrice = settings?.coursePrice ?? "$389";
 
   return (
     <div className="min-h-screen bg-white">
@@ -521,7 +521,8 @@ export function CoursePage() {
             to="/signup"
             className="inline-block bg-white text-black px-12 py-6 text-xl font-bold hover:bg-neutral-200 transition-colors"
           >
-            START YOUR LAUNDROMAT JOURNEY — {coursePrice}
+            {/* START YOUR LAUNDROMAT JOURNEY — {coursePrice} */}
+            START YOUR LAUNDROMAT JOURNEY — $389
           </Link>
         </div>
       </section>

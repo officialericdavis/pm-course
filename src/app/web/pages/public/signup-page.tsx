@@ -31,13 +31,13 @@ export function SignupPage() {
     const ref = searchParams.get("ref");
     if (ref) sessionStorage.setItem("campaign_ref", ref);
   }, []);
-  const basePrice = parseFloat(String(settings?.coursePrice ?? "$997").replace(/[^0-9.]/g, "")) || 997;
+  const basePrice = parseFloat(String(settings?.coursePrice ?? "$389").replace(/[^0-9.]/g, "")) || 389;
   const displayPrice = (() => {
-    if (!coupon) return settings?.coursePrice ?? "$997";
+    if (!coupon) return settings?.coursePrice ?? "$389";
     if (coupon.discountType === "free") return "FREE";
     if (coupon.discountType === "percent") return `$${(basePrice * (1 - coupon.discountValue / 100)).toFixed(0)}`;
     if (coupon.discountType === "fixed") return `$${Math.max(0, basePrice - coupon.discountValue).toFixed(0)}`;
-    return settings?.coursePrice ?? "$997";
+    return settings?.coursePrice ?? "$389";
   })();
 
   const handleApplyCoupon = async () => {
@@ -212,14 +212,17 @@ export function SignupPage() {
 
               <div className="mb-4 text-center">
                 <p className="text-sm text-neutral-500">Total due today</p>
-                <p className="text-3xl font-black">{displayPrice}</p>
+                {/* <p className="text-3xl font-black">{displayPrice}</p> */}
+                <p className="text-3xl font-black">$389</p>
+
               </div>
 
               <button
                 type="submit" disabled={loading}
                 className="w-full bg-black text-white px-8 py-4 text-lg font-bold hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Please wait..." : isFree ? "CREATE ACCOUNT — FREE" : `CONTINUE TO CHECKOUT — ${displayPrice}`}
+                {/* {loading ? "Please wait..." : isFree ? "CREATE ACCOUNT — FREE" : `CONTINUE TO CHECKOUT — ${displayPrice}`} */}
+                {loading ? "Please wait..." : isFree ? "CREATE ACCOUNT — FREE" : `CONTINUE TO CHECKOUT — $389`}
               </button>
             </form>
 

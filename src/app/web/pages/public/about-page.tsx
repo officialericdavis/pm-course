@@ -51,7 +51,7 @@ export function AboutPage() {
       <section className="py-12 md:py-20 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-[1fr_1.3fr] gap-10 md:gap-16 items-center">
           <div>
-            <ImageWithFallback src={peterMayberryImage2} alt="Peter Mayberry" className="w-full h-[320px] sm:h-[440px] md:h-[600px] object-cover grayscale" />
+            <ImageWithFallback src={peterMayberryImage2} alt="Peter Mayberry" className="w-full h-[320px] sm:h-[440px] md:h-[600px] object-cover" />
           </div>
           <div>
             <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-6">Where I came from?</h2>

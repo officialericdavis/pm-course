@@ -2964,4 +2964,91 @@ app.delete("/make-server-623b2a1c/admin/delete-video/:lessonId", async (c) => {
   }
 });
 
+// ── Legal Pages (Privacy Policy & Terms of Service) ─────────────────────────
+
+const DEFAULT_LEGAL: Record<string, string> = {
+  privacy: `Privacy Policy
+
+Last updated: January 1, 2026
+
+1. Information We Collect
+We collect information you provide directly to us, such as your name, email address, and payment information when you purchase our course.
+
+2. How We Use Your Information
+We use the information we collect to provide, maintain, and improve our services, process transactions, and send you related information including purchase confirmations and course access details.
+
+3. Information Sharing
+We do not sell, trade, or otherwise transfer your personal information to outside parties except as described in this policy. We may share your information with trusted third parties who assist us in operating our website and conducting our business.
+
+4. Data Security
+We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+
+5. Cookies
+We may use cookies to enhance your experience on our site. You can choose to disable cookies through your browser settings.
+
+6. Third-Party Services
+We use Stripe for payment processing. Your payment information is handled directly by Stripe and is subject to their privacy policy.
+
+7. Contact Us
+If you have questions about this Privacy Policy, please contact us at support@petermayberry.com.`,
+
+  terms: `Terms of Service
+
+Last updated: January 1, 2026
+
+1. Acceptance of Terms
+By purchasing and accessing the Mayberry Laundromat Course, you agree to be bound by these Terms of Service.
+
+2. Course Access
+Upon successful payment, you will receive lifetime access to the course content. Access is granted to a single user and may not be shared or transferred.
+
+3. Refund Policy
+We offer a 30-day money-back guarantee. If you are not satisfied with the course, contact us within 30 days of purchase for a full refund.
+
+4. Intellectual Property
+All course content, including videos, documents, and materials, is the intellectual property of Peter Mayberry and may not be reproduced, distributed, or resold without written permission.
+
+5. Disclaimer
+The information provided in this course is for educational purposes only. Results are not guaranteed and will vary based on individual effort and market conditions.
+
+6. Limitation of Liability
+Peter Mayberry and Mayberry Capital shall not be liable for any indirect, incidental, or consequential damages arising from your use of the course.
+
+7. Governing Law
+These terms shall be governed by and construed in accordance with the laws of the United States.
+
+8. Contact
+For questions regarding these Terms, contact us at support@petermayberry.com.`,
+};
+
+app.get("/make-server-623b2a1c/legal/:page", async (c) => {
+  try {
+    const page = c.req.param("page");
+    if (!["privacy", "terms"].includes(page)) return c.json({ error: "Not found" }, 404);
+    const stored = await kv.get(`legal:${page}`);
+    const content = stored?.content ?? DEFAULT_LEGAL[page];
+    return c.json({ content, updatedAt: stored?.updatedAt ?? null });
+  } catch {
+    return c.json({ error: "Failed to fetch page" }, 500);
+  }
+});
+
+app.put("/make-server-623b2a1c/legal/:page", async (c) => {
+  try {
+    const token = c.req.header("Authorization")?.replace("Bearer ", "");
+    const { user, error, statusCode } = await requireAdmin(token);
+    if (error) return c.json({ error }, statusCode);
+    const page = c.req.param("page");
+    if (!["privacy", "terms"].includes(page)) return c.json({ error: "Not found" }, 404);
+    const { content } = await c.req.json();
+    if (typeof content !== "string" || !content.trim()) return c.json({ error: "Content is required" }, 400);
+    const updatedAt = new Date().toISOString();
+    await kv.set(`legal:${page}`, { content: content.trim(), updatedAt });
+    logActivity(user.id, user.name, `Updated ${page === "privacy" ? "Privacy Policy" : "Terms of Service"}`);
+    return c.json({ success: true, updatedAt });
+  } catch {
+    return c.json({ error: "Failed to update page" }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

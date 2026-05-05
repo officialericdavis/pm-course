@@ -12,6 +12,7 @@ import {
   Mail,
   Globe,
   Database,
+  FileText,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -25,6 +26,7 @@ const NAV_ITEMS = [
   { path: "/admin/courses", label: "Courses", icon: BookOpen },
   { path: "/admin/email-marketing", label: "Email Marketing", icon: Mail },
   { path: "/admin/database", label: "Laundromat DB", icon: Database },
+  { path: "/admin/legal", label: "Legal Pages", icon: FileText },
   { path: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

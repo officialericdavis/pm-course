@@ -28,6 +28,8 @@ export function Footer() {
           <Link to="/course" className="text-xs font-bold text-neutral-500 hover:opacity-60 transition-opacity">COURSE</Link>
           <Link to="/about" className="text-xs font-bold text-neutral-500 hover:opacity-60 transition-opacity">ABOUT</Link>
           <Link to="/login" className="text-xs font-bold text-neutral-500 hover:opacity-60 transition-opacity">LOGIN</Link>
+          <Link to="/privacy" className="text-xs font-bold text-neutral-500 hover:opacity-60 transition-opacity">PRIVACY</Link>
+          <Link to="/terms" className="text-xs font-bold text-neutral-500 hover:opacity-60 transition-opacity">TERMS</Link>
         </div>
 
         {/* Social icons */}

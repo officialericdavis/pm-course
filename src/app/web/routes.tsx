@@ -5,6 +5,7 @@ import { useAuth } from "../contexts/auth";
 // Public pages — loaded eagerly (these are what visitors see first)
 import { LandingPage } from "./pages/public/landing-page";
 import { AboutPage } from "./pages/public/about-page";
+import { LegalPage } from "./pages/public/legal-page";
 import { CoursePage } from "./pages/public/course-page";
 import { LoginPage } from "./pages/public/login-page";
 import { SignupPage } from "./pages/public/signup-page";
@@ -27,6 +28,7 @@ const AdminEmailMarketing = lazy(() => import("./pages/admin/email-marketing").t
 const AdminWebsiteAnalytics = lazy(() => import("./pages/admin/website-analytics").then(m => ({ default: m.AdminWebsiteAnalytics })));
 const AdminSettings      = lazy(() => import("./pages/admin/settings").then(m => ({ default: m.AdminSettings })));
 const AdminDatabase      = lazy(() => import("./pages/admin/database").then(m => ({ default: m.AdminDatabase })));
+const AdminLegal         = lazy(() => import("./pages/admin/legal").then(m => ({ default: m.AdminLegal })));
 const StudentDashboard   = lazy(() => import("./pages/student/dashboard").then(m => ({ default: m.StudentDashboard })));
 const StudentCourse      = lazy(() => import("./pages/student/course").then(m => ({ default: m.StudentCourse })));
 const StudentLocations   = lazy(() => import("./pages/student/locations").then(m => ({ default: m.StudentLocations })));
@@ -49,6 +51,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 export const webRouter = createBrowserRouter([
+  { path: "/privacy", Component: LegalPage },
+  { path: "/terms",   Component: LegalPage },
   { path: "/",                Component: LandingPage },
   { path: "/about",           Component: AboutPage },
   { path: "/course",          Component: CoursePage },
@@ -78,6 +82,7 @@ export const webRouter = createBrowserRouter([
   { path: "/admin/website-analytics", element: <RequireAuth><AdminWebsiteAnalytics /></RequireAuth> },
   { path: "/admin/settings",        element: <RequireAuth><AdminSettings /></RequireAuth> },
   { path: "/admin/database",        element: <RequireAuth><AdminDatabase /></RequireAuth> },
+  { path: "/admin/legal",           element: <RequireAuth><AdminLegal /></RequireAuth> },
   // Student Portal Routes
   { path: "/student/dashboard", element: <RequireAuth><StudentDashboard /></RequireAuth> },
   { path: "/student/course",    element: <RequireAuth><StudentCourse /></RequireAuth> },

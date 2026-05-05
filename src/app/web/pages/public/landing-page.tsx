@@ -10,8 +10,8 @@ import { projectId } from "/utils/supabase/info";
 import { supabase } from "/utils/supabase/client";
 
 const TRACK = `https://${projectId}.supabase.co/functions/v1/make-server-623b2a1c/track`;
-const STRIPE_PRICE_ID = "price_1TSelSAZNpuUqk5vk1vE9KfC";
-
+const STRIPE_PRICE_ID = "price_1TTiAeAZNpuUqk5vB3FxwTMg";
+  
 function getSessionId(): string {
   let id = sessionStorage.getItem("_sid");
   if (!id) { id = crypto.randomUUID(); sessionStorage.setItem("_sid", id); }

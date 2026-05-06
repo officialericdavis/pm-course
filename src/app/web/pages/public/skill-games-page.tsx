@@ -216,8 +216,8 @@ export function SkillGamesPage() {
                       </div>
                       <div>
                         <p className="text-base text-black mb-1">Email</p>
-                        <a href="mailto:info@e8productions.com" className="text-sm text-black/60 hover:text-black transition-colors break-all">
-                          info@e8productions.com
+                        <a href="mailto:peter@e8productions.com" className="text-sm text-black/60 hover:text-black transition-colors break-all">
+                          peter@e8productions.com
                         </a>
                       </div>
                     </div>

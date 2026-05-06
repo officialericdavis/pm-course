@@ -3140,4 +3140,55 @@ app.post("/make-server-623b2a1c/cron/inactive-students", async (c) => {
   }
 });
 
+
+// ── Skill Games Contact Form ─────────────────────────────────────────────────
+app.post("/make-server-623b2a1c/skill-games-contact", async (c) => {
+  try {
+    const { name, phone, address, state, zip, business } = await c.req.json();
+    if (!name || !phone || !address || !state || !zip || !business) {
+      return c.json({ error: "All fields are required." }, 400);
+    }
+
+    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+    if (!RESEND_API_KEY) return c.json({ error: "Email service not configured." }, 500);
+
+    const html = `
+      <h2>New Skill Games Inquiry</h2>
+      <table style="border-collapse:collapse;width:100%">
+        <tr><td style="padding:8px;font-weight:bold">Name</td><td style="padding:8px">${name}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Phone</td><td style="padding:8px">${phone}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Address</td><td style="padding:8px">${address}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">State</td><td style="padding:8px">${state}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Zip</td><td style="padding:8px">${zip}</td></tr>
+        <tr><td style="padding:8px;font-weight:bold">Business</td><td style="padding:8px">${business}</td></tr>
+      </table>
+    `;
+
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "Skill Games <onboarding@resend.dev>",
+        to: ["peter@e8productions.com"],
+        subject: `New Skill Games Inquiry from ${name}`,
+        html,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("[skill-games-contact] Resend error:", err);
+      return c.json({ error: "Failed to send email." }, 500);
+    }
+
+    return c.json({ message: "Message sent. We will get back to you shortly." });
+  } catch (err) {
+    console.error("[skill-games-contact] Error:", err);
+    return c.json({ error: "An unexpected error occurred." }, 500);
+  }
+});
+
 Deno.serve(app.fetch);

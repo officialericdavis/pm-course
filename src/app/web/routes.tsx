@@ -7,6 +7,7 @@ import { LandingPage } from "./pages/public/landing-page";
 import { AboutPage } from "./pages/public/about-page";
 import { LegalPage } from "./pages/public/legal-page";
 import { CoursePage } from "./pages/public/course-page";
+import { SkillGamesPage } from "./pages/public/skill-games-page";
 import { LoginPage } from "./pages/public/login-page";
 import { SignupPage } from "./pages/public/signup-page";
 import { ForgotPasswordPage } from "./pages/public/forgot-password";
@@ -56,6 +57,7 @@ export const webRouter = createBrowserRouter([
   { path: "/",                Component: LandingPage },
   { path: "/about",           Component: AboutPage },
   { path: "/course",          Component: CoursePage },
+  { path: "/skill-games",     Component: SkillGamesPage },
   { path: "/login",           Component: LoginPage },
   { path: "/signup",          Component: SignupPage },
   { path: "/forgot-password",    Component: ForgotPasswordPage },

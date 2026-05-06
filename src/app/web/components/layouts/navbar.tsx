@@ -17,6 +17,9 @@ export function Navbar() {
           <Link to="/course" className="text-xs md:text-sm font-bold tracking-wide uppercase hover:opacity-70 transition-opacity">
             Course
           </Link>
+          <Link to="/skill-games" className="text-xs md:text-sm font-bold tracking-wide uppercase hover:opacity-70 transition-opacity">
+            Skill Games
+          </Link>
           <Link to="/about" className="text-xs md:text-sm font-bold tracking-wide uppercase hover:opacity-70 transition-opacity">
             About Me
           </Link>

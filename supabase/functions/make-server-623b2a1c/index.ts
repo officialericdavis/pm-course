@@ -9,7 +9,7 @@ const app = new Hono();
 const _siteUrl = Deno.env.get("SITE_URL");
 app.use("*", cors({
   origin: _siteUrl
-    ? [_siteUrl, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:4173"]
+    ? [_siteUrl, "http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:4173", "https://petermayberry.com"]
     : "*",
   allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowHeaders: ["Authorization", "Content-Type"],

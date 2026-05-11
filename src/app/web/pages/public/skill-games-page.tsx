@@ -194,8 +194,7 @@ export function SkillGamesPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12 px-4 sm:px-0">
-              {/* Form */}
+            <div className="max-w-xl mx-auto px-4 sm:px-0">
               <div className="bg-white border border-black/5 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg">
                 <h3 className="text-lg sm:text-xl text-black mb-4 sm:mb-6">
                   Send Me A Message

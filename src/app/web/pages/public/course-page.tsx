@@ -462,23 +462,7 @@ export function CoursePage() {
               <p className="text-neutral-700">
                 No. This course is designed for complete beginners. I walk you through every single step.
               </p>
-            </div>
-
-            <div className="bg-white border-l-4 border-black p-6">
-              <h3 className="text-xl font-bold mb-2">How much money do I need to get started?</h3>
-              <p className="text-neutral-700">
-                Typically $25K-$50K to buy your first location. I cover financing options including
-                SBA loans and seller financing if you don't have it all upfront.
-              </p>
-            </div>
-
-            <div className="bg-white border-l-4 border-black p-6">
-              <h3 className="text-xl font-bold mb-2">How much time does this require?</h3>
-              <p className="text-neutral-700">
-                Setup phase requires 10-15 hours per week for 2-3 months. Once running, 2-5 hours
-                per week depending on how automated you make it.
-              </p>
-            </div>
+            </div>  
 
             <div className="bg-white border-l-4 border-black p-6">
               <h3 className="text-xl font-bold mb-2">Can I do this while working full-time?</h3>

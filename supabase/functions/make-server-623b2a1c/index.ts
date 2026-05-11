@@ -13,6 +13,7 @@ app.use("*", cors({
     : "*",
   allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowHeaders: ["Authorization", "Content-Type"],
+  credentials: true,
 }));
 app.use("*", logger(console.log));
 
@@ -3190,5 +3191,4 @@ app.post("/make-server-623b2a1c/skill-games-contact", async (c) => {
     return c.json({ error: "An unexpected error occurred." }, 500);
   }
 });
-
 Deno.serve(app.fetch);

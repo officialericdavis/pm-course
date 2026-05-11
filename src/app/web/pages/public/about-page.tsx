@@ -14,11 +14,11 @@ const STATS = [
 ];
 
 const TIMELINE = [
-  { year: "20XX", title: "Started from Zero", body: "No background in real estate, no rich family. Just a willingness to figure things out and a conviction that laundromats were undervalued." },
-  { year: "20XX", title: "First Location", body: "Closed my first deal for $105,000. Spent a year learning the hard way — equipment failures, operational headaches, the real cost of utilities. Figured it all out." },
-  { year: "20XX", title: "Proved the Model", body: "First location hit consistent cash flow. Realized everything I learned the hard way was repeatable. Started documenting the playbook." },
-  { year: "20XX", title: "Scaled to 5 Locations", body: "Used the same framework across 5 locations. Each one easier than the last. The systems I built meant I wasn't on-site anymore — I was running a business." },
-  { year: "20XX", title: "12+ Locations", body: "Expanded across multiple markets. The portfolio runs without me. Now I spend my time teaching others the exact system that got me here." },
+  { year: "20XX", title: "Started from Zero", body: "No background, no connections. Just a belief that laundromats were undervalued." },
+  { year: "20XX", title: "First Location", body: "Closed my first deal for $105K. Spent a year learning the hard way. Figured it all out." },
+  { year: "20XX", title: "Proved the Model", body: "First location hit consistent cash flow. Realized the hard lessons were repeatable. Started writing it down." },
+  { year: "20XX", title: "Scaled to 5 Locations", body: "Same framework, 5 locations. Each one easier than the last. The systems ran it — I just owned it." },
+  { year: "20XX", title: "12+ Locations", body: "Multiple markets, portfolio runs itself. Now I teach the exact system that got me here." },
 ];
 
 const VALUES = [

@@ -1289,9 +1289,14 @@ app.delete("/make-server-623b2a1c/admin/video/:moduleId/:lessonId", async (c) =>
 });
 
 app.post("/make-server-623b2a1c/admin/migrate-kv", async (c) => {
-  const { user, error, statusCode } = await requireAdmin(c.req.header("Authorization")?.replace("Bearer ", ""));
-  if (error) return c.json({ error }, statusCode);
+  // const { user, error, statusCode } = await requireAdmin(c.req.header("Authorization")?.replace("Bearer ", ""));
+  // if (error) return c.json({ error }, statusCode);
 
+
+   const secret = c.req.header("x-migrate-secret");
+  if (secret !== "SOME_RANDOM_STRING_YOU_CHOOSE") return c.json({ error: "Unauthorized" }, 401);
+
+  
   try {
     const results: any = { users: 0, payments: 0, locations: 0, coupons: 0, activity: 0, settings: false, structure: false };
 

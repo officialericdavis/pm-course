@@ -940,7 +940,7 @@ app.post("/make-server-623b2a1c/create-checkout-session", async (c) => {
     coupon = c_;
   }
 
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY_TEST");
   if (!stripeKey) return c.json({ error: "Payment system not configured" }, 500);
 
   const settings = await getSettings();
@@ -989,7 +989,7 @@ app.post("/make-server-623b2a1c/create-checkout-session", async (c) => {
 });
 
 app.post("/make-server-623b2a1c/stripe-webhook", async (c) => {
-  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET_TEST");
   if (!webhookSecret) return c.json({ error: "Not configured" }, 500);
 
   const body = await c.req.text();

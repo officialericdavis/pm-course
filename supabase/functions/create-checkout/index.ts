@@ -1,6 +1,6 @@
 import Stripe from 'https://esm.sh/stripe@14.21.0'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY_TEST')!, {
   apiVersion: '2024-04-10',
 })
 
